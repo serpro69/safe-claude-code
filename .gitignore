@@ -1,0 +1,29 @@
+# ignore all hidden
+.*
+# except
+!.gitattributes
+!.gitignore
+!.gitmodules
+!.github
+!.github/**
+!.yamlfmt.yaml
+!.yamllint.yml
+!.mcp.json
+!.capy.toml
+!.sessions/
+!.arc.yml
+!docs/**/.files
+!.gitleaks.toml
+
+# Logs
+logs
+*.log*
+
+# AI tools
+!.claude
+!.codex
+.claude/worktrees
+/capy
+.capy/**
+!.capy
+!.capy/AGENTS.md
