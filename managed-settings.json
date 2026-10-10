@@ -75,8 +75,8 @@
       "Bash(git rm *)",
       "Bash(git commit --amend *)",
 
-      "Bash(find * -delete *)",
-      "Bash(find * -exec *)",
+      "Bash(find * -delete*)",
+      "Bash(find * -exec*)",
       "Bash(xargs rm *)",
       "Bash(xargs sudo *)",
       "Bash(brew install *)",
@@ -156,7 +156,12 @@
       "Edit(.latexmkrc)",
       "Edit(latexmkrc)",
       "Edit(.Rprofile)",
-      "Edit(.Renviron)"
+      "Edit(.Renviron)",
+      "Edit(.vscode/**)",
+      "Edit(.idea/**)",
+      "Edit(~/Library/Python/**)",
+      "Edit(~/.local/lib/**)",
+      "Edit(~/.ipython/**)"
     ],
 
     "ask": [
@@ -272,6 +277,9 @@
         "~/.bash_profile",
         "~/.profile",
         "~/.gitconfig",
+        "~/Library/Python",
+        "~/.local/lib",
+        "~/.ipython",
         "/usr/local/claude-guard"
       ],
       "denyRead": []
@@ -328,6 +336,8 @@
   "disableCommandPluginSources": true,
   "strictKnownMarketplaces": [],
   "enableAllProjectMcpServers": false,
+  "allowManagedMcpServersOnly": true,
+  "allowedMcpServers": [],
   "fileCheckpointingEnabled": true,
   "cleanupPeriodDays": 90
 }

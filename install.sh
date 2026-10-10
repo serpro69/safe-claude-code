@@ -29,18 +29,46 @@ die()  { printf '\033[1;31merror:\033[0m %s\n' "$1" >&2; exit 1; }
 [ "$(uname)" = "Darwin" ] || die "This installer is for macOS. On Linux the managed path is /etc/claude-code/."
 [ "$(id -u)" = "0" ] || die "Please run with sudo:  sudo ./install.sh"
 
+# The guard runs under one of these system interpreters in isolated mode
+# (python3 -I). On a Mac without the Command Line Tools, /usr/bin/python3 is a
+# stub that only offers to install them, so each candidate is actually run.
 PYTHON=""
 for c in /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3; do
-    [ -x "$c" ] && PYTHON="$c" && break
+    if [ -x "$c" ] && "$c" -I -c 'import sys' >/dev/null 2>&1; then
+        PYTHON="$c"
+        break
+    fi
 done
-[ -n "$PYTHON" ] || die "python3 was not found. On macOS run 'xcode-select --install' first."
-ok "found python3 at $PYTHON"
+[ -n "$PYTHON" ] || die "no working python3 was found at /usr/bin, /opt/homebrew/bin or /usr/local/bin. On macOS run 'xcode-select --install' first."
+ok "found a working python3 at $PYTHON"
 
-command -v claude >/dev/null 2>&1 && ok "found claude on PATH" || \
+if command -v claude >/dev/null 2>&1; then
+    ok "found claude on PATH"
+    # A hook that fails to start only blocks the tool call on Claude Code
+    # 2.1.295 or later (onFailure: "block"). guard.sh cannot help there,
+    # because it is the thing that failed to start.
+    CC_VERSION="$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+    if [ -n "$CC_VERSION" ] && ! "$PYTHON" -I -c 'import sys; v = tuple(int(x) for x in sys.argv[1].split(".")); sys.exit(0 if v >= (2, 1, 295) else 1)' "$CC_VERSION"; then
+        say "warning: Claude Code $CC_VERSION is older than 2.1.295. On that version a guard that fails to start lets the command through. Update Claude Code."
+    fi
+else
     say "note: 'claude' is not on PATH yet. Install the CLI or the VS Code extension before first use."
+fi
 
 [ -f "$SRC_DIR/managed-settings.json" ] || die "managed-settings.json not found next to this script."
 [ -f "$SRC_DIR/hooks/guard.py" ] || die "hooks/guard.py not found next to this script."
+[ -f "$SRC_DIR/hooks/guard.sh" ] || die "hooks/guard.sh not found next to this script."
+
+# --- run the guard's own test suite before trusting it ---------------------
+if [ -f "$SRC_DIR/tests/test_guard.py" ]; then
+    say "Running the guard test suite"
+    if TEST_OUTPUT="$("$PYTHON" -I "$SRC_DIR/tests/test_guard.py" 2>&1)"; then
+        ok "$(printf '%s\n' "$TEST_OUTPUT" | grep '^passed:' | tail -1)"
+    else
+        printf '%s\n' "$TEST_OUTPUT" | tail -40 >&2
+        die "the guard test suite failed. Not installing."
+    fi
+fi
 
 # --- validate the policy JSON before installing it -------------------------
 say "Validating the policy file"
