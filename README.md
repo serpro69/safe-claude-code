@@ -166,3 +166,9 @@ Everything is meant to be adjusted. After any change, re-run
 
 For stronger isolation (a full container or VM), see Claude Code's
 `sandbox-environments` and `devcontainer` documentation.
+
+--
+
+## TODO
+
+- [ ] Upgrade procedure for when this repo introduces new changes
