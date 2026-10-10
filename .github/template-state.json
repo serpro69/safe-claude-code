@@ -1,0 +1,18 @@
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "94c5a05198e0f76919cec2eacacb09503045cf88",
+  "synced_at": "2026-10-10T18:26:57Z",
+  "variables": {
+    "PROJECT_NAME": "safe-claude-code",
+    "LANGUAGES": "go",
+    "CC_MODEL": "claude-opus-5-5",
+    "CC_STATUSLINE": "enhanced",
+    "CC_EFFORT_LEVEL": "high",
+    "CC_PERMISSION_MODE": "default",
+    "CODEX_APPROVAL_POLICY": "on-request",
+    "CODEX_MODEL": "gpt-6-astra",
+    "SKIP_CAPY": "false"
+  },
+  "plugin_migrated": true
+}

@@ -1,0 +1,3 @@
+[store]
+path = ".capy/knowledge.db"
+key_file = ".capy/db.key"

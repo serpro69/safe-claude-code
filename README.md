@@ -1,11 +1,11 @@
 # Claude Safe Mode for macOS
 
-A locked-down Claude Code configuration for a non-technical user.
+A locked-down Claude Code configuration aimed at improving security
+and confidence of running claude-code for non-technical users.
 
-It is built for non-tech-savvy people (for example, someone doing a
-non-technical PhD research on their mac (linux is partially supported,
-but some features will be unavailable) who wants Claude Code in the VS Code
-extension or the cli, but is worried about it running commands they don't understand.
+It is primarily built for non-tech-savvy researchers who want Claude Code in the
+VS Code extension or the cli running on their mac (linux is partially supported),
+but who is worried about claude running commands they don't understand.
 
 The goal: **ordinary work keeps working, and anything destructive is refused
 before it runs.** The user is never relied on to read a command and
