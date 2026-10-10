@@ -14,7 +14,8 @@ that for you.
 - **Your files are backed up.** Every time Claude changes a file, a copy of the
   old version is saved first, in a hidden folder called `.claude-safe-backups`
   in your home folder. If Claude ever changes something you didn't want, the
-  previous version is there.
+  previous version is there. If a backup ever fails, Claude shows you a
+  warning saying so.
 - **Your passwords and keys are off limits.** Claude cannot read your saved
   passwords, SSH keys, or browser data.
 - **The internet is limited** to research sites (where Python packages, R
