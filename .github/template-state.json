@@ -1,8 +1,8 @@
 {
   "schema_version": "1",
   "upstream_repo": "serpro69/claude-toolbox",
-  "template_version": "94c5a05198e0f76919cec2eacacb09503045cf88",
-  "synced_at": "2026-10-10T18:26:57Z",
+  "template_version": "c1894e1ecf6be001a90697e170554c15972dc039",
+  "synced_at": "2026-10-16T06:54:35Z",
   "variables": {
     "PROJECT_NAME": "safe-claude-code",
     "LANGUAGES": "go",
