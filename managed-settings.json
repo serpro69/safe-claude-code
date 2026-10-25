@@ -339,5 +339,5 @@
   "allowManagedMcpServersOnly": true,
   "allowedMcpServers": [],
   "fileCheckpointingEnabled": true,
-  "cleanupPeriodDays": 90
+  "cleanupPeriodDays": 3650
 }
