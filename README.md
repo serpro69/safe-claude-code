@@ -49,6 +49,12 @@ extension runs the same CLI underneath, so all four apply there too.
    the edit still goes ahead but the user sees a warning and `verify.sh`
    reports it.
 
+Claude's own session history (`~/.claude/projects/`, what `/resume` shows) is
+also kept: Claude Code deletes it after 30 days by default, and the policy
+raises that to 10 years (`cleanupPeriodDays: 3650`). There is no "never"
+value; `0` is rejected by Claude Code. Because the setting is managed, a
+user's own settings cannot shorten it.
+
 The configuration lives in the root-owned managed-settings location, so a
 Claude session **cannot turn off its own guardrails** — it would need the
 admin password, which Claude never has. `bypassPermissions` mode and the
