@@ -56,4 +56,14 @@ The backups are in your home folder, in `.claude-safe-backups`, sorted by date.
 Ask Claude: *"show me the backups of this file from today"* and it can find the
 earlier version for you to restore.
 
+## If an old conversation seems to be missing
+
+Your conversations with Claude are kept for 10 years. In VS Code, though, a
+conversation you haven't touched for 14 days moves out of the main list into
+**Archived sessions**, further down the same list. It is not deleted. Expand
+**Archived sessions** and click **Unarchive session** to bring it back.
+
+If you would rather keep everything in the main list, open VS Code's settings,
+search for **Archive Inactive Sessions**, and choose **Never**.
+
 That's it. Work normally, and let the safety net do its job.
