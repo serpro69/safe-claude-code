@@ -57,6 +57,14 @@ if [ -f "$MANAGED_FILE" ]; then
     if [ -n "$PYTHON" ]; then
         "$PYTHON" -I -c "import json,sys;json.load(open(sys.argv[1]))" "$MANAGED_FILE" >/dev/null 2>&1 \
             && ok "policy is valid JSON" || no "policy is not valid JSON"
+        CLAUDE_TMP="/tmp/claude-${SUDO_UID:-$(id -u)}"
+        [ "$(uname)" = "Darwin" ] && CLAUDE_TMP="/private$CLAUDE_TMP"
+        if "$PYTHON" -I -c "import json,sys;sys.exit(sys.argv[2] not in json.load(open(sys.argv[1])).get('permissions',{}).get('additionalDirectories',[]))" \
+            "$MANAGED_FILE" "$CLAUDE_TMP" >/dev/null 2>&1; then
+            ok "Claude's temp folder $CLAUDE_TMP is allowed"
+        else
+            warn "Claude's temp folder $CLAUDE_TMP is not in permissions.additionalDirectories; commands that work there will ask for approval"
+        fi
     fi
 fi
 
