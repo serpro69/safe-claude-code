@@ -76,6 +76,37 @@ say "Validating the policy file"
     || die "managed-settings.json is not valid JSON. Not installing."
 ok "policy JSON is valid"
 
+# --- add the user's Claude temp folder to the policy -----------------------
+# Claude Code keeps its scratchpad in /tmp/claude-<uid> (/tmp is
+# /private/tmp on macOS). It is outside the project, so a command that cd's
+# into it asks for approval even though the sandbox allows it. Listing it as
+# an additional directory removes those prompts. The uid differs per user,
+# so the entry is written here rather than kept in managed-settings.json.
+REAL_USER="${SUDO_USER:-$(stat -f '%Su' /dev/console)}"
+POLICY_FILE="$(mktemp)"
+trap 'rm -f "$POLICY_FILE"' EXIT
+if [ -n "$REAL_USER" ] && [ "$REAL_USER" != "root" ]; then
+    REAL_UID="$(id -u "$REAL_USER")" || die "could not look up the uid of $REAL_USER."
+    "$PYTHON" -I -c '
+import json, sys
+src, dst, uid = sys.argv[1:]
+with open(src) as f:
+    policy = json.load(f)
+dirs = policy.setdefault("permissions", {}).setdefault("additionalDirectories", [])
+for d in ("/private/tmp/claude-" + uid, "/tmp/claude-" + uid):
+    if d not in dirs:
+        dirs.append(d)
+with open(dst, "w") as f:
+    json.dump(policy, f, indent=2)
+    f.write("\n")
+' "$SRC_DIR/managed-settings.json" "$POLICY_FILE" "$REAL_UID" \
+        || die "could not add the Claude temp folder to the policy. Not installing."
+    ok "allowed Claude's temp folder /private/tmp/claude-$REAL_UID for $REAL_USER"
+else
+    cp "$SRC_DIR/managed-settings.json" "$POLICY_FILE"
+    say "warning: could not tell which user this is for. Claude's temp folder is not allowed, so commands there will ask for approval."
+fi
+
 # --- install the guard -----------------------------------------------------
 say "Installing the guard script to $GUARD_DIR"
 install -d -o root -g wheel -m 755 "$GUARD_DIR"
@@ -107,11 +138,10 @@ say "Installing the managed policy to $MANAGED_FILE"
 install -d -o root -g wheel -m 755 "$MANAGED_DIR"
 # World-readable is required: Claude Code silently skips a managed file it
 # cannot read, which would leave the machine unprotected.
-install -o root -g wheel -m 644 "$SRC_DIR/managed-settings.json" "$MANAGED_FILE"
+install -o root -g wheel -m 644 "$POLICY_FILE" "$MANAGED_FILE"
 ok "policy installed, owned by root, world-readable (0644)"
 
 # --- backups directory for the user ----------------------------------------
-REAL_USER="${SUDO_USER:-$(stat -f '%Su' /dev/console)}"
 if [ -n "$REAL_USER" ] && [ "$REAL_USER" != "root" ]; then
     USER_HOME="$(eval echo "~$REAL_USER")"
     BK="$USER_HOME/.claude-safe-backups"
@@ -127,6 +157,9 @@ What changed:
   * Managed policy:  $MANAGED_FILE
   * Guard script:    $GUARD_DIR/
   * File backups:    ~/.claude-safe-backups/  (kept 30 days)
+
+Tip: copy examples/CLAUDE.md into each project folder so Claude keeps its
+working files (such as text extracted from PDFs) inside the project.
 
 Next steps:
   1. Close every open Claude Code window or VS Code window and reopen it.

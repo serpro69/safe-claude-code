@@ -103,7 +103,10 @@ sudo ./install.sh
 The installer validates the policy, runs the guard's test suite, installs the
 guard to `/usr/local/claude-guard/`, self-tests the installed copy (confirms it
 blocks `rm -rf /` and allows `ls`), then writes the policy to
-`/Library/Application Support/ClaudeCode/managed-settings.json` as root.
+`/Library/Application Support/ClaudeCode/managed-settings.json` as root. On the
+way it adds the user's Claude temp folder (`/private/tmp/claude-<uid>`) to
+`permissions.additionalDirectories`; see "Fewer prompts in Claude's temp folder"
+below.
 
 Then **fully quit and reopen VS Code** (or the `claude` CLI). The policy is read
 at startup.
@@ -111,7 +114,9 @@ at startup.
 On Linux the installer refuses to run. Copy `managed-settings.json` to
 `/etc/claude-code/managed-settings.json` and `hooks/guard.py` plus
 `hooks/guard.sh` to `/usr/local/claude-guard/` as root, make them
-world-readable, then run `./verify.sh`. The macOS-only parts of the policy
+world-readable, then run `./verify.sh`. Add `/tmp/claude-<uid>` (the user's
+`id -u`) to `permissions.additionalDirectories` in the copied policy by hand;
+`verify.sh` warns if it is missing. The macOS-only parts of the policy
 (the Seatbelt sandbox, `diskutil`, Keychain paths) are simply inert there.
 
 ## Verify
@@ -147,6 +152,7 @@ left alone.
 | `verify.sh`             | Checks the install and runs live block/allow tests.                       |
 | `uninstall.sh`          | Removes the policy and guard (needs `sudo`).                              |
 | `tests/test_guard.py`   | 300+ tests for the guard and wrapper. Run `python3 tests/test_guard.py`.  |
+| `examples/CLAUDE.md`    | Project instructions that keep Claude's working files inside the project. |
 | `USERGUIDE.md`          | Plain-language user guide.                                                |
 
 ---
@@ -177,6 +183,21 @@ Everything is meant to be adjusted. After any change, re-run
   and the automatic backups all still apply. The user can also switch mode
   mid-session with Shift+Tab; the two unsafe modes (`bypassPermissions` and
   `auto`) are disabled and cannot be selected.
+- **Fewer prompts in Claude's temp folder.** Sandboxed commands normally run
+  without asking, but a command that `cd`s outside the project asks first, in
+  every mode. Claude often does that with its own scratchpad, for example to
+  grep text it extracted from PDFs (`cd /private/tmp/claude-502/…/scratchpad;
+  grep …`). `install.sh` therefore adds `/private/tmp/claude-<uid>` and
+  `/tmp/claude-<uid>` to `permissions.additionalDirectories` for the user who
+  ran `sudo`. Claude can already write there through the sandbox, so this
+  only removes prompts. The path is Claude Code's default; if
+  `CLAUDE_CODE_TMPDIR` is set, the folder moves and the prompts come back.
+- **Keep working files in the project.** Copy `examples/CLAUDE.md` into the
+  root of each project folder, or merge it into an existing `CLAUDE.md` there.
+  It tells Claude to save extracted text under `sources/text/` and to run
+  commands from the project folder instead of `cd`ing elsewhere. That avoids
+  the prompts above, and the extracted text survives between sessions; each
+  session gets a new scratchpad.
 
 ---
 
